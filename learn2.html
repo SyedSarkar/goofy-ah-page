@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Goofy Ah Website</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background-color: #f0f8ff;
+      transition: background-color 0.5s ease;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+
+    .emoji {
+      font-size: 36px;
+      display: inline-block;
+      margin-top: 10px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Goofy Ahh Page</h1>
+
+  <input type="text" id="nameInput" placeholder="What's your name?" />
+
+  <select id="moodSelect">
+    <option value="">How are you feeling today?</option>
+    <option value="happy">😄 Happy</option>
+    <option value="sad">😢 Sad</option>
+    <option value="excited">🤩 Excited</option>
+    <option value="chill">😌 Chill</option>
+  </select>
+
+  <button id="greetBtn" onclick="greetUser()">Greet Me</button>
+
+  <div id="output"></div>
+
+  <!-- 🎵 Background Music Player -->
+  <div style="margin-top: 40px;">
+    <h3>Background Music 🎼</h3>
+    <audio id="bgMusic" preload="auto"></audio>
+
+    <button id="playPauseBtn" onclick="toggleMusic()">▶ Play</button>
+    <input type="range" id="musicSlider" value="0" min="0" step="1" style="width: 300px;" />
+    <div>
+      <span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span>
+    </div>
+  </div>
+
+  <!-- 🎵 Greeting sound effect -->
+  <audio id="greetSound" src="chime.mp3" preload="auto"></audio>
+
+  <script>
+    // Main greeting function
+    function greetUser() {
+      const name = document.getElementById('nameInput').value.trim();
+      const mood = document.getElementById('moodSelect').value;
+      const output = document.getElementById('output');
+      const button = document.getElementById('greetBtn');
+      const sound = document.getElementById('greetSound');
+
+      if (name === "") {
+        output.style.color = 'red';
+        output.innerHTML = "Oops! Please enter your name.";
+        return;
+      }
+
+      let message = `Yo ${name}! `;
+      let emoji = '';
+      let bgColor = '#f0f8ff';
+      let song = "background.mp3"; // default
+
+      switch(mood) {
+        case 'happy':
+          message += "Good We Like Happy People, Stay Happy! 🎉";
+          emoji = '😄';
+          bgColor = '#fffacd';
+          song = "happy.mp3";
+          break;
+        case 'sad':
+          message += "Nah Bro Bieng sad is just a waste of Time! ";
+          emoji = '😢';
+          bgColor = '#d0e7f9';
+          song = "sad.mp3";
+          break;
+        case 'excited':
+          message += "Lesssssssssss GOOOO!";
+          emoji = '🤩';
+          bgColor = '#ffe4e1';
+          song = "excited.mp3";
+          break;
+        case 'chill':
+          message += "I am Aslo a Chill Guy";
+          emoji = '😌';
+          bgColor = '#e0ffe0';
+          song = "chill.mp3";
+          break;
+        default:
+          message += "Really bruh Just Select some Mode";
+          emoji = '👋';
+          bgColor = '#f0f8ff';
+      }
+
+      document.body.style.backgroundColor = bgColor;
+
+      // Update message output
+      output.innerHTML = `
+        <span>${message}</span><br/>
+        <span class="emoji">${emoji}</span>
+      `;
+      output.style.color = '#333';
+      output.style.animation = 'none';
+      output.offsetHeight;
+      output.style.animation = null;
+
+      // Play greeting chime
+      sound.currentTime = 0;
+      sound.play();
+
+      // Update button
+      button.textContent = "🎉 Greeted!";
+      setTimeout(() => {
+        button.textContent = "Greet Me";
+      }, 2000);
+
+      // 🎧 Update background music based on mood
+      bgMusic.src = song;
+      bgMusic.load();
+      bgMusic.currentTime = 0;
+      bgMusic.play();
+      playPauseBtn.textContent = '⏸ Pause';
+    }
+
+    // Background music controls
+    const bgMusic = document.getElementById('bgMusic');
+    const musicSlider = document.getElementById('musicSlider');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('totalDuration');
+
+    function toggleMusic() {
+      if (bgMusic.paused) {
+        bgMusic.play();
+        playPauseBtn.textContent = '⏸ Pause';
+      } else {
+        bgMusic.pause();
+        playPauseBtn.textContent = '▶ Play';
+      }
+    }
+
+    // Format seconds to mm:ss
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    // Update time & slider
+    bgMusic.addEventListener('timeupdate', () => {
+      musicSlider.value = bgMusic.currentTime;
+      currentTimeEl.textContent = formatTime(bgMusic.currentTime);
+    });
+
+    // Load duration when metadata is ready
+    bgMusic.addEventListener('loadedmetadata', () => {
+      musicSlider.max = bgMusic.duration;
+      durationEl.textContent = formatTime(bgMusic.duration);
+    });
+
+    // Seek to new position
+    musicSlider.addEventListener('input', () => {
+      bgMusic.currentTime = musicSlider.value;
+    });
+  </script>
+
+</body>
+</html>
