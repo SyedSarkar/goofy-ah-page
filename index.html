@@ -95,13 +95,24 @@
     <div>
       <span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span>
     </div>
+
+    <!-- ⏩ Jump to time input -->
+    <div style="margin-top: 20px;">
+      <input type="text" id="jumpInput" placeholder="3:15 If you are Happy" />
+      <button onclick="jumpToTime()">⏩ Jump</button>
+    </div>
   </div>
 
   <!-- 🎵 Greeting sound effect -->
   <audio id="greetSound" src="chime.mp3" preload="auto"></audio>
 
   <script>
-    // Main greeting function
+    const bgMusic = document.getElementById('bgMusic');
+    const musicSlider = document.getElementById('musicSlider');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('totalDuration');
+
     function greetUser() {
       const name = document.getElementById('nameInput').value.trim();
       const mood = document.getElementById('moodSelect').value;
@@ -128,7 +139,7 @@
           song = "happy.mp3";
           break;
         case 'sad':
-          message += "Nah Bro Bieng sad is just a waste of Time! ";
+          message += "Nah Bro Bieng sad is just a waste of Time!";
           emoji = '😢';
           bgColor = '#d0e7f9';
           song = "sad.mp3";
@@ -146,14 +157,13 @@
           song = "chill.mp3";
           break;
         default:
-          message += "Really bruh Just Select some Mode";
+          message += "Really bruh Just Select some Mood!";
           emoji = '👋';
           bgColor = '#f0f8ff';
       }
 
       document.body.style.backgroundColor = bgColor;
 
-      // Update message output
       output.innerHTML = `
         <span>${message}</span><br/>
         <span class="emoji">${emoji}</span>
@@ -163,30 +173,25 @@
       output.offsetHeight;
       output.style.animation = null;
 
-      // Play greeting chime
       sound.currentTime = 0;
       sound.play();
 
-      // Update button
       button.textContent = "🎉 Greeted!";
       setTimeout(() => {
         button.textContent = "Greet Me";
       }, 2000);
 
-      // 🎧 Update background music based on mood
+      // Load and play music from 0 seconds
       bgMusic.src = song;
       bgMusic.load();
-      bgMusic.currentTime = 0;
-      bgMusic.play();
-      playPauseBtn.textContent = '⏸ Pause';
-    }
 
-    // Background music controls
-    const bgMusic = document.getElementById('bgMusic');
-    const musicSlider = document.getElementById('musicSlider');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const currentTimeEl = document.getElementById('currentTime');
-    const durationEl = document.getElementById('totalDuration');
+      bgMusic.addEventListener('loadedmetadata', function startMusicAtTen() {
+        bgMusic.currentTime = 0;
+        bgMusic.play();
+        playPauseBtn.textContent = '⏸ Pause';
+        bgMusic.removeEventListener('loadedmetadata', startMusicAtTen);
+      });
+    }
 
     function toggleMusic() {
       if (bgMusic.paused) {
@@ -198,29 +203,55 @@
       }
     }
 
-    // Format seconds to mm:ss
     function formatTime(seconds) {
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
       return `${mins}:${secs}`;
     }
 
-    // Update time & slider
     bgMusic.addEventListener('timeupdate', () => {
       musicSlider.value = bgMusic.currentTime;
       currentTimeEl.textContent = formatTime(bgMusic.currentTime);
     });
 
-    // Load duration when metadata is ready
     bgMusic.addEventListener('loadedmetadata', () => {
       musicSlider.max = bgMusic.duration;
       durationEl.textContent = formatTime(bgMusic.duration);
     });
 
-    // Seek to new position
     musicSlider.addEventListener('input', () => {
       bgMusic.currentTime = musicSlider.value;
     });
+
+    function jumpToTime() {
+      const input = document.getElementById('jumpInput').value.trim();
+      let seconds = 0;
+
+      if (input.includes(':')) {
+        const parts = input.split(':');
+        const mins = parseInt(parts[0], 10);
+        const secs = parseInt(parts[1], 10);
+        if (!isNaN(mins) && !isNaN(secs)) {
+          seconds = (mins * 60) + secs;
+        } else {
+          alert("Invalid time format!");
+          return;
+        }
+      } else {
+        seconds = parseInt(input, 10);
+        if (isNaN(seconds)) {
+          alert("Please enter a valid number or time format like 1:30");
+          return;
+        }
+      }
+
+      if (seconds > bgMusic.duration) {
+        alert("That's beyond the track length!");
+        return;
+      }
+
+      bgMusic.currentTime = seconds;
+    }
   </script>
 
 </body>
